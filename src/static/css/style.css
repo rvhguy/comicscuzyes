@@ -1,0 +1,209 @@
+/* Comics Cuz Yes — hand-drawn vibe.
+   The trick throughout: uneven border-radius + a tiny rotation, so nothing
+   sits perfectly square. Machines draw straight lines; people don't. */
+
+/* Fonts are self-hosted, not pulled from Google — no third-party request
+   on a kid's site, and the page still renders right if Google is having a day. */
+@font-face {
+  font-family: "Patrick Hand";
+  src: url("/fonts/patrick-hand-latin-400-normal.woff2") format("woff2");
+  font-weight: 400; font-style: normal; font-display: swap;
+}
+@font-face {
+  font-family: "Display";
+  src: url("/fonts/gloria-hallelujah-latin-400-normal.woff2") format("woff2");
+  font-weight: 400; font-style: normal; font-display: swap;
+}
+
+:root {
+  --paper:   #fbf6ea;
+  --paper-2: #fffdf7;
+  --ink:     #2b2622;
+  --ink-soft:#6d635a;
+  --marker:  #e4572e;
+  --hilite:  #ffd93d;
+  --rule:    #2b2622;
+  --wobble-a: 255px 15px 225px 15px / 15px 225px 15px 255px;
+  --wobble-b: 15px 225px 15px 255px / 225px 15px 255px 15px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --paper:   #1e1b19;
+    --paper-2: #f6f1e6;   /* panels stay paper — you're looking at drawings */
+    --ink:     #f2ece0;
+    --ink-soft:#b3a89a;
+    --rule:    #f2ece0;
+  }
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  padding: 0 1rem 4rem;
+  background-color: var(--paper);
+  background-image: radial-gradient(circle at 1px 1px, rgba(120,110,95,.14) 1px, transparent 0);
+  background-size: 22px 22px;
+  color: var(--ink);
+  font-family: "Patrick Hand", "Comic Sans MS", cursive, system-ui, sans-serif;
+  font-size: 20px;
+  line-height: 1.55;
+}
+
+.skip {
+  position: absolute; left: -9999px;
+  background: var(--hilite); color: #2b2622; padding: .6rem 1rem;
+}
+.skip:focus { left: 1rem; top: 1rem; z-index: 10; }
+
+/* ---------- masthead ---------- */
+
+.masthead { max-width: 62rem; margin: 0 auto; padding: 2.5rem 0 1rem; text-align: center; }
+
+/* line-height is set generously: Gloria Hallelujah has tall ascenders, and at
+   .92 the Y of "Yes" climbs into the word above it. */
+.logo { display: inline-block; text-decoration: none; color: var(--ink); line-height: 1.14; }
+.logo-l1, .logo-l2 { display: block; font-family: "Display", "Patrick Hand", cursive; }
+.logo-l1 { font-size: clamp(2.3rem, 8vw, 3.9rem); transform: rotate(-2.2deg); }
+.logo-l2 {
+  font-size: clamp(2.8rem, 10vw, 5rem);
+  color: var(--marker);
+  transform: rotate(1.4deg) translateX(.35rem);
+  text-shadow: 2px 3px 0 rgba(43,38,34,.14);
+}
+.logo:hover .logo-l1 { transform: rotate(-3.4deg); }
+.logo:hover .logo-l2 { transform: rotate(2.6deg) translateX(.35rem); }
+.logo-l1, .logo-l2 { transition: transform .18s ease; }
+
+.tagline { margin: .4rem 0 1.2rem; color: var(--ink-soft); font-size: 1.05rem; }
+
+.topnav { display: flex; gap: .9rem; justify-content: center; flex-wrap: wrap; }
+.topnav a {
+  color: var(--ink); text-decoration: none;
+  padding: .15rem .55rem;
+  background-image: linear-gradient(var(--hilite), var(--hilite));
+  background-repeat: no-repeat;
+  background-position: 0 88%;
+  background-size: 0% .5em;
+  transition: background-size .2s ease;
+}
+.topnav a:hover, .topnav a:focus-visible { background-size: 100% .5em; }
+
+/* ---------- the strip ---------- */
+
+main { max-width: 62rem; margin: 0 auto; }
+
+.strip-title {
+  font-family: "Display", "Patrick Hand", cursive;
+  font-size: clamp(1.9rem, 5vw, 2.9rem);
+  text-align: center; margin: 1.4rem 0 .1rem; font-weight: 400;
+}
+.strip-date { text-align: center; margin: 0 0 1.3rem; color: var(--ink-soft); font-size: .95rem; }
+
+.panel {
+  background: var(--paper-2);
+  border: 3px solid var(--rule);
+  border-radius: var(--wobble-a);
+  padding: .7rem;
+  transform: rotate(var(--tilt, 0deg));
+  box-shadow: 5px 6px 0 rgba(43,38,34,.13);
+}
+.panel img { display: block; width: 100%; height: auto; border-radius: 4px; }
+
+.strip-note {
+  max-width: 44rem; margin: 1.6rem auto 0; color: var(--ink-soft);
+  border-left: 3px solid var(--hilite); padding-left: .9rem;
+}
+.strip-note p { margin: .4rem 0; }
+
+/* ---------- navigation ---------- */
+
+.stripnav {
+  display: flex; gap: .5rem; align-items: center; justify-content: center;
+  flex-wrap: wrap; margin: 2.2rem auto 0;
+}
+
+.btn {
+  font-family: "Patrick Hand", cursive;
+  font-size: 1.05rem;
+  padding: .5rem 1.1rem;
+  color: var(--ink); text-decoration: none;
+  background: var(--paper-2);
+  border: 2.5px solid var(--rule);
+  border-radius: var(--wobble-b);
+  box-shadow: 3px 3px 0 rgba(43,38,34,.16);
+  transition: transform .12s ease, box-shadow .12s ease;
+}
+@media (prefers-color-scheme: dark) { .btn { color: #2b2622; } }
+.btn:hover, .btn:focus-visible {
+  transform: translate(-1px, -2px) rotate(-.6deg);
+  box-shadow: 5px 6px 0 rgba(43,38,34,.2);
+}
+.btn.is-off { opacity: .32; box-shadow: none; pointer-events: none; }
+
+.counter { color: var(--ink-soft); font-size: .95rem; padding: 0 .5rem; }
+.counter .of { opacity: .7; }
+
+/* On a phone, keep all four buttons on one row and drop the counter beneath,
+   rather than letting "Last" wrap onto a lonely second line. */
+@media (max-width: 32rem) {
+  .stripnav { gap: .35rem; }
+  .btn { padding: .45rem .55rem; font-size: .95rem; }
+  .counter { order: 5; flex-basis: 100%; text-align: center; margin-top: .7rem; }
+}
+
+/* ---------- archive grid ---------- */
+
+.page-title {
+  font-family: "Display", "Patrick Hand", cursive; font-weight: 400;
+  font-size: clamp(2rem, 6vw, 3rem); text-align: center; margin: 1.6rem 0 .2rem;
+}
+.page-sub { text-align: center; color: var(--ink-soft); margin: 0 0 2.4rem; }
+
+.grid {
+  list-style: none; padding: 0; margin: 0;
+  display: grid; gap: 2rem;
+  grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+}
+.grid-item {
+  background: var(--paper-2);
+  border: 2.5px solid var(--rule);
+  border-radius: var(--wobble-a);
+  padding: .6rem;
+  transform: rotate(var(--tilt, 0deg));
+  box-shadow: 4px 5px 0 rgba(43,38,34,.13);
+  transition: transform .15s ease;
+  position: relative;
+}
+.grid-item::before {   /* a strip of tape */
+  content: ""; position: absolute; top: -.65rem; left: 50%;
+  width: 3.4rem; height: 1.3rem; transform: translateX(-50%) rotate(-3deg);
+  background: rgba(255,217,61,.55);
+  border-left: 1px dashed rgba(43,38,34,.2);
+  border-right: 1px dashed rgba(43,38,34,.2);
+}
+.grid-item:hover { transform: rotate(0deg) scale(1.025); }
+.grid-item a { text-decoration: none; color: #2b2622; display: block; }
+.grid-item img { display: block; width: 100%; height: auto; border-radius: 3px; }
+.grid-title { display: block; margin-top: .5rem; font-size: 1.15rem; }
+.grid-date  { display: block; color: #6d635a; font-size: .85rem; }
+
+/* ---------- misc ---------- */
+
+.prose { max-width: 40rem; margin: 0 auto; }
+.prose a { color: var(--marker); }
+.empty { text-align: center; color: var(--ink-soft); margin: 4rem 0; }
+
+.footer {
+  max-width: 62rem; margin: 4rem auto 0; padding-top: 1.4rem;
+  border-top: 2.5px dashed rgba(120,110,95,.4);
+  text-align: center; color: var(--ink-soft); font-size: .95rem;
+}
+.footer p { margin: .3rem 0; }
+.footer a { color: var(--marker); }
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; }
+  .panel, .grid-item { transform: none; }
+}

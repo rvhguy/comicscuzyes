@@ -1,0 +1,25 @@
+---
+permalink: /feed.xml
+eleventyExcludeFromCollections: true
+---
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>{{ site.title }}</title>
+  <subtitle>{{ site.description }}</subtitle>
+  <link href="{{ site.url }}/feed.xml" rel="self"/>
+  <link href="{{ site.url }}/"/>
+  <updated>{% if collections.comics.length %}{{ collections.comics[collections.comics.length - 1].data.date | isoDate }}{% endif %}</updated>
+  <id>{{ site.url }}/</id>
+  <author><name>{{ site.author }}</name></author>
+  {%- for c in collections.comics | reverse %}
+  <entry>
+    <title>{{ c.data.title }}</title>
+    <link href="{{ site.url }}/comic/{{ c.data.slug }}/"/>
+    <updated>{{ c.data.date | isoDate }}</updated>
+    <id>{{ site.url }}/comic/{{ c.data.slug }}/</id>
+    <content type="html">
+      &lt;p&gt;&lt;img src="{{ site.url }}/images/comics/{{ c.data.image }}" alt="{{ c.data.alt }}"&gt;&lt;/p&gt;
+    </content>
+  </entry>
+  {%- endfor %}
+</feed>

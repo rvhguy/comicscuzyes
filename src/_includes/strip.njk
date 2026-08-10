@@ -1,0 +1,15 @@
+{# Renders one comic panel + its caption. Expects `c` (the comic) in scope. #}
+<article class="strip">
+  <h1 class="strip-title">{{ c.data.title }}</h1>
+  <p class="strip-date"><time datetime="{{ c.data.date | isoDate }}">{{ c.data.date | longDate }}</time></p>
+
+  <div class="panel" style="--tilt: {{ c.data.slug | wobble }}deg">
+    <img src="/images/comics/{{ c.data.image }}"
+         alt="{{ c.data.alt }}"
+         width="900" height="600" fetchpriority="high">
+  </div>
+
+  {% if c.templateContent | trim %}
+    <div class="strip-note">{{ c.templateContent | safe }}</div>
+  {% endif %}
+</article>

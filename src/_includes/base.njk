@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% if pageTitle %}{{ pageTitle }} &middot; {% endif %}{{ site.title }}</title>
+<meta name="description" content="{{ site.description }}">
+<link rel="alternate" type="application/atom+xml" href="/feed.xml" title="{{ site.title }}">
+<link rel="icon" href="/favicon.svg">
+<link rel="preload" href="/fonts/patrick-hand-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/gloria-hallelujah-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+<a class="skip" href="#main">Skip to the comic</a>
+
+<header class="masthead">
+  <a class="logo" href="/">
+    <span class="logo-l1">Comics</span>
+    <span class="logo-l2">Cuz&nbsp;Yes</span>
+  </a>
+  <p class="tagline">{{ site.tagline }}</p>
+  <nav class="topnav">
+    <a href="/">Latest</a>
+    <a href="/archive/">Archive</a>
+    <a href="/about/">About</a>
+  </nav>
+</header>
+
+<main id="main">
+{{ content | safe }}
+</main>
+
+<footer class="footer">
+  <p>Comics by <strong>Octember</strong>. Please don't repost them without asking.</p>
+  <p class="feedline"><a href="/feed.xml">Follow by RSS</a></p>
+</footer>
+
+</body>
+</html>

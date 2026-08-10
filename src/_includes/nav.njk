@@ -1,0 +1,23 @@
+{# Expects `idx` (0-based position) and `comics` (the sorted collection). #}
+{% set total = comics.length %}
+{% set hasPrev = idx > 0 %}
+{% set hasNext = idx < (total - 1) %}
+<nav class="stripnav" aria-label="Comic navigation">
+  {% if hasPrev %}
+    <a class="btn" href="/comic/{{ comics[0].data.slug }}/" rel="first"><span aria-hidden="true">&laquo;</span> First</a>
+    <a class="btn" href="/comic/{{ comics[idx - 1].data.slug }}/" rel="prev"><span aria-hidden="true">&lsaquo;</span> Prev</a>
+  {% else %}
+    <span class="btn is-off"><span aria-hidden="true">&laquo;</span> First</span>
+    <span class="btn is-off"><span aria-hidden="true">&lsaquo;</span> Prev</span>
+  {% endif %}
+
+  <span class="counter">{{ idx + 1 }} <span class="of">of</span> {{ total }}</span>
+
+  {% if hasNext %}
+    <a class="btn" href="/comic/{{ comics[idx + 1].data.slug }}/" rel="next">Next <span aria-hidden="true">&rsaquo;</span></a>
+    <a class="btn" href="/comic/{{ comics[total - 1].data.slug }}/" rel="last">Last <span aria-hidden="true">&raquo;</span></a>
+  {% else %}
+    <span class="btn is-off">Next <span aria-hidden="true">&rsaquo;</span></span>
+    <span class="btn is-off">Last <span aria-hidden="true">&raquo;</span></span>
+  {% endif %}
+</nav>

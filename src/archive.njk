@@ -1,0 +1,20 @@
+---
+layout: base.njk
+permalink: /archive/index.html
+pageTitle: Archive
+---
+{% set comics = collections.comics %}
+<h1 class="page-title">Every comic so far</h1>
+<p class="page-sub">{{ comics.length }} comic{% if comics.length != 1 %}s{% endif %}, newest first.</p>
+
+<ul class="grid">
+{% for c in comics | reverse %}
+  <li class="grid-item" style="--tilt: {{ c.data.slug | wobble }}deg">
+    <a href="/comic/{{ c.data.slug }}/">
+      <img src="/images/comics/{{ c.data.image }}" alt="{{ c.data.alt }}" loading="lazy" width="900" height="600">
+      <span class="grid-title">{{ c.data.title }}</span>
+      <span class="grid-date">{{ c.data.date | longDate }}</span>
+    </a>
+  </li>
+{% endfor %}
+</ul>

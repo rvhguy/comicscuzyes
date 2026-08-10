@@ -1,0 +1,13 @@
+---
+layout: base.njk
+permalink: /index.html
+---
+{% set comics = collections.comics %}
+{% if comics.length %}
+  {% set c = comics[comics.length - 1] %}
+  {% include "strip.njk" %}
+  {% set idx = comics.length - 1 %}
+  {% include "nav.njk" %}
+{% else %}
+  <p class="empty">No comics yet. Octember is warming up.</p>
+{% endif %}

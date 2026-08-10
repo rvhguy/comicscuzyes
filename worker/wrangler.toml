@@ -1,0 +1,25 @@
+name = "comicscuzyes-publisher"
+main = "src/index.js"
+compatibility_date = "2026-08-01"
+
+# publish.comicscuzyes.com routes here; /review is additionally protected by a
+# Cloudflare Access policy AND by JWT verification inside the Worker.
+# routes = [{ pattern = "publish.comicscuzyes.com", custom_domain = true }]
+
+[[kv_namespaces]]
+binding = "PENDING"
+id = "REPLACE_WITH_KV_NAMESPACE_ID"
+
+[vars]
+GH_REPO = "YOURNAME/comicscuzyes"      # owner/repo
+GH_BRANCH = "main"
+NOTIFY_TO = "you@example.com"
+NOTIFY_FROM = "Comics Cuz Yes <comics@comicscuzyes.com>"
+ACCESS_TEAM = "yourteam"               # <yourteam>.cloudflareaccess.com
+ACCESS_AUD = "REPLACE_WITH_ACCESS_APP_AUD"
+
+# Secrets — set with `wrangler secret put NAME`, never in this file:
+#   SUBMIT_SECRET    what the Mac app sends. Rotate freely.
+#   APPROVAL_SECRET  signs the one-click approve/reject links.
+#   GH_TOKEN         fine-grained PAT, contents:read/write on that ONE repo.
+#   RESEND_KEY       Resend API key.

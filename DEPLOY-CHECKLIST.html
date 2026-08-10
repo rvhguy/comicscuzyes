@@ -1,0 +1,449 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Comics Cuz Yes — deploy checklist</title>
+<style>
+  :root{
+    --paper:#fbf6ea; --card:#fffdf7; --ink:#2b2622; --soft:#6d635a;
+    --marker:#e4572e; --hilite:#ffd93d; --line:#e0d8c8; --ok:#2e7d52;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;padding:0 1rem 6rem;background:var(--paper);color:var(--ink);
+    font:16px/1.6 -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+    background-image:radial-gradient(circle at 1px 1px,rgba(120,110,95,.13) 1px,transparent 0);
+    background-size:22px 22px;
+  }
+  .wrap{max-width:52rem;margin:0 auto}
+  header{padding:2.5rem 0 1rem;text-align:center}
+  h1{font-size:2rem;margin:0 0 .2rem}
+  .sub{color:var(--soft);margin:0}
+  .bar{position:sticky;top:0;z-index:5;background:var(--paper);padding:.8rem 0;border-bottom:2px solid var(--line);margin-bottom:1.6rem}
+  .bar-inner{display:flex;align-items:center;gap:1rem}
+  .track{flex:1;height:12px;background:#eee6d6;border-radius:99px;overflow:hidden;border:1px solid var(--line)}
+  .fill{height:100%;width:0;background:var(--marker);transition:width .25s ease}
+  .count{font-size:.9rem;color:var(--soft);white-space:nowrap}
+
+  .step{background:var(--card);border:2px solid var(--ink);border-radius:12px;
+    padding:1.1rem 1.3rem;margin:0 0 1.4rem;box-shadow:4px 5px 0 rgba(43,38,34,.1)}
+  .step.done{opacity:.62}
+  .step.done .body{display:none}
+  .head{display:flex;gap:.8rem;align-items:flex-start;cursor:pointer}
+  .head input{width:22px;height:22px;margin-top:.25rem;flex:none;accent-color:var(--marker)}
+  .head h2{font-size:1.18rem;margin:0}
+  .num{color:var(--marker);font-weight:700}
+  .why{color:var(--soft);font-size:.92rem;margin:.15rem 0 0}
+  .body{margin-top:1rem}
+  ol,ul{padding-left:1.3rem;margin:.6rem 0}
+  li{margin:.45rem 0}
+  code{background:#f0e9da;padding:.12em .38em;border-radius:4px;font-size:.9em;
+    font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+  pre{position:relative;background:#2b2622;color:#f6f1e6;padding:.9rem 1rem;border-radius:8px;
+    overflow-x:auto;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.86rem;line-height:1.5}
+  /* inline <code> gets a light chip; inside a dark <pre> it must not, or the
+     light chip background lands under light text and the commands vanish */
+  pre code{background:none;color:inherit;padding:0;font-size:1em}
+  pre [data-out]{color:var(--hilite)}
+  pre button{position:absolute;top:.5rem;right:.5rem;background:#4a423b;color:#f6f1e6;border:0;
+    padding:.3rem .6rem;border-radius:5px;font-size:.75rem;cursor:pointer}
+  pre button:hover{background:var(--marker)}
+  .field{margin:.9rem 0}
+  .field label{display:block;font-weight:600;font-size:.92rem;margin-bottom:.25rem}
+  .field .hint{color:var(--soft);font-size:.85rem;font-weight:400}
+  .field input{width:100%;padding:.6rem .7rem;border:2px solid var(--line);border-radius:7px;
+    font:inherit;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.88rem;background:#fff}
+  .field input:focus{outline:none;border-color:var(--marker)}
+  .gen{background:var(--ink);color:var(--card);border:0;padding:.5rem .9rem;border-radius:7px;
+    cursor:pointer;font:inherit;font-size:.85rem;margin-top:.4rem}
+  .gen:hover{background:var(--marker)}
+  .note{border-left:4px solid var(--hilite);padding:.5rem .9rem;margin:.9rem 0;background:#fffbe9;
+    border-radius:0 6px 6px 0}
+  .warn{border-left:4px solid var(--marker);padding:.5rem .9rem;margin:.9rem 0;background:#fdf0eb;
+    border-radius:0 6px 6px 0}
+  .warn strong,.note strong{display:block;margin-bottom:.15rem}
+  .missing{color:var(--marker);font-style:italic}
+  footer{text-align:center;color:var(--soft);font-size:.9rem;margin-top:2rem;
+    border-top:2px dashed var(--line);padding-top:1.4rem}
+  .exportbtn{background:var(--marker);color:#fff;border:0;padding:.8rem 1.6rem;border-radius:8px;
+    font:inherit;font-size:1rem;cursor:pointer}
+  @media print{.bar{position:static} .step.done .body{display:block} pre button{display:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <h1>Comics Cuz Yes — deploy checklist</h1>
+  <p class="sub">Eleven steps. Roughly 45 minutes, most of it waiting on DNS.</p>
+</header>
+
+<div class="bar"><div class="bar-inner">
+  <div class="track"><div class="fill" id="fill"></div></div>
+  <div class="count" id="count">0 of 11</div>
+</div></div>
+
+<div class="warn">
+  <strong>Fill in the boxes as you go.</strong>
+  Every command below rewrites itself to use your real values, so you can copy them
+  straight across. Nothing is saved anywhere — keep this tab open until you finish,
+  and use <em>Save my values</em> at the bottom before you close it.
+</div>
+
+<!-- 0 -->
+<section class="step" data-step>
+  <div class="head"><input type="checkbox">
+    <div><h2><span class="num">1.</span> Unpack the project</h2>
+    <p class="why">Everything else runs from inside this folder.</p></div></div>
+  <div class="body">
+    <p>Unzip <code>comicscuzyes.zip</code> somewhere sensible — alongside your Bluehost
+    Migration folder is fine. Then:</p>
+    <pre><code>cd path/to/comicscuzyes
+npm install
+npx @11ty/eleventy --serve</code></pre>
+    <p>Open <code>http://localhost:8080</code>. You should see the placeholder comics.
+    Stop it with Ctrl-C when you've had a look.</p>
+    <div class="note"><strong>Check Node first</strong>
+    <code>node --version</code> should print 18 or higher. If not, <code>brew install node</code>.</div>
+  </div>
+</section>
+
+<!-- 1 -->
+<section class="step" data-step>
+  <div class="head"><input type="checkbox">
+    <div><h2><span class="num">2.</span> Create the GitHub repo</h2>
+    <p class="why">This is the permanent archive. Every approved comic lands here as a plain file.</p></div></div>
+  <div class="body">
+    <p>Make a new <strong>private</strong> repo on GitHub. Don't add a README or
+    .gitignore — the folder already has what it needs.</p>
+    <div class="field">
+      <label>Your repo <span class="hint">— owner/name, exactly as GitHub shows it</span></label>
+      <input data-var="repo" placeholder="rvhguy/comicscuzyes">
+    </div>
+    <pre><code>cd path/to/comicscuzyes
+git init
+git add .
+git commit -m "Comics Cuz Yes"
+git branch -M main
+git remote add origin https://github.com/<span data-out="repo">YOUR-REPO</span>.git
+git push -u origin main</code></pre>
+  </div>
+</section>
+
+<!-- 2 -->
+<section class="step" data-step>
+  <div class="head"><input type="checkbox">
+    <div><h2><span class="num">3.</span> Make a GitHub token</h2>
+    <p class="why">This is what the Worker uses to commit an approved comic. It's the most sensitive value here.</p></div></div>
+  <div class="body">
+    <p>GitHub → your avatar → <strong>Settings</strong> → <strong>Developer settings</strong> →
+    <strong>Personal access tokens</strong> → <strong>Fine-grained tokens</strong> → <strong>Generate new token</strong>.</p>
+    <ul>
+      <li><strong>Repository access:</strong> Only select repositories → pick <em>just</em> this one</li>
+      <li><strong>Permissions:</strong> Repository permissions → <strong>Contents: Read and write</strong>. Nothing else. Leave every other permission on "No access".</li>
+      <li><strong>Expiration:</strong> pick a real date and put it in your calendar</li>
+    </ul>
+    <div class="warn"><strong>Copy it now</strong>
+    GitHub shows the token exactly once. Paste it somewhere temporary — you'll use it in step 7.</div>
+    <div class="field">
+      <label>Token expiry date <span class="hint">— so it's written down somewhere</span></label>
+      <input data-var="expiry" placeholder="2027-08-09">
+    </div>
+  </div>
+</section>
+
+<!-- 3 -->
+<section class="step" data-step>
+  <div class="head"><input type="checkbox">
+    <div><h2><span class="num">4.</span> Point Cloudflare Pages at the repo</h2>
+    <p class="why">This is what actually serves the site. It rebuilds on every push.</p></div></div>
+  <div class="body">
+    <p>Cloudflare dashboard → <strong>Workers &amp; Pages</strong> → <strong>Create</strong> →
+    <strong>Pages</strong> → <strong>Connect to Git</strong> → pick the repo.</p>
+    <ul>
+      <li>Framework preset: <strong>None</strong></li>
+      <li>Build command: <code>npx @11ty/eleventy</code></li>
+      <li>Build output directory: <code>_site</code></li>
+    </ul>
+    <p>Save and deploy. You'll get a <code>*.pages.dev</code> URL — open it and confirm the
+    placeholder comics are there. Then <strong>Custom domains</strong> → add
+    <code>comicscuzyes.com</code> and <code>www.comicscuzyes.com</code>. Since the domain is
+    already in this Cloudflare account, the DNS records get created for you.</p>
+  </div>
+</section>
+
+<!-- 4 -->
+<section class="step" data-step>
+  <div class="head"><input type="checkbox">
+    <div><h2><span class="num">5.</span> Set up Resend for the notification email</h2>
+    <p class="why">This is how the approval reaches you. Free tier is far more than enough.</p></div></div>
+  <div class="body">
+    <ol>
+      <li>Sign up at resend.com and add <strong>comicscuzyes.com</strong> as a domain.</li>
+      <li>It gives you a few DNS records. Add them in Cloudflare DNS for
+        <strong>comicscuzyes.com</strong>.</li>
+      <li>Wait for Resend to show the domain as verified — usually minutes.</li>
+      <li>API Keys → create one with <strong>Sending access</strong>.</li>
+    </ol>
+    <div class="warn"><strong>Only touch comicscuzyes.com</strong>
+    You have mail records on other domains. Make sure you're in the right zone before
+    adding anything — a stray SPF record in the wrong place breaks real email.</div>
+    <div class="field">
+      <label>Where should approval emails go?</label>
+      <input data-var="email" placeholder="rvhguy@gmail.com">
+    </div>
+  </div>
+</section>
+
+<!-- 5 -->
+<section class="step" data-step>
+  <div class="head"><input type="checkbox">
+    <div><h2><span class="num">6.</span> Generate the two secrets</h2>
+    <p class="why">One lets her app submit. The other signs your approve links. They must be different.</p></div></div>
+  <div class="body">
+    <p>Press the button — these are generated in your own browser and go nowhere else.</p>
+    <button class="gen" onclick="genSecrets()">Generate both secrets</button>
+    <div class="field">
+      <label>SUBMIT_SECRET <span class="hint">— goes in her Mac app and her Shortcut</span></label>
+      <input data-var="submit" placeholder="press the button above">
+    </div>
+    <div class="field">
+      <label>APPROVAL_SECRET <span class="hint">— never leaves the Worker</span></label>
+      <input data-var="approval" placeholder="press the button above">
+    </div>
+    <div class="note"><strong>If you'd rather use your own terminal</strong>
+    <code>openssl rand -hex 24</code> and <code>openssl rand -hex 32</code>.</div>
+  </div>
+</section>
+
+<!-- 6 -->
+<section class="step" data-step>
+  <div class="head"><input type="checkbox">
+    <div><h2><span class="num">7.</span> Create the KV store and deploy the Worker</h2>
+    <p class="why">KV holds pending comics. Nothing here is public.</p></div></div>
+  <div class="body">
+    <pre><code>cd path/to/comicscuzyes/worker
+npx wrangler login
+npx wrangler kv namespace create PENDING</code></pre>
+    <p>That prints an <code>id</code>. Paste it here:</p>
+    <div class="field">
+      <label>KV namespace id</label>
+      <input data-var="kv" placeholder="a1b2c3d4e5f6...">
+    </div>
+    <p>Now open <code>worker/wrangler.toml</code> and make the top of it look like this:</p>
+    <pre><code>[[kv_namespaces]]
+binding = "PENDING"
+id = "<span data-out="kv">YOUR-KV-ID</span>"
+
+[vars]
+GH_REPO = "<span data-out="repo">YOUR-REPO</span>"
+GH_BRANCH = "main"
+NOTIFY_TO = "<span data-out="email">you@example.com</span>"
+NOTIFY_FROM = "Comics Cuz Yes &lt;comics@comicscuzyes.com&gt;"
+ACCESS_TEAM = "fill-this-in-at-step-9"
+ACCESS_AUD = "fill-this-in-at-step-9"</code></pre>
+    <p>Then set the four secrets. Each command prompts you to paste the value:</p>
+    <pre><code>npx wrangler secret put SUBMIT_SECRET
+npx wrangler secret put APPROVAL_SECRET
+npx wrangler secret put GH_TOKEN
+npx wrangler secret put RESEND_KEY
+npx wrangler deploy</code></pre>
+    <div class="note"><strong>What to paste at each prompt</strong>
+    SUBMIT_SECRET and APPROVAL_SECRET from step 6, GH_TOKEN from step 3, RESEND_KEY from step 5.</div>
+  </div>
+</section>
+
+<!-- 7 -->
+<section class="step" data-step>
+  <div class="head"><input type="checkbox">
+    <div><h2><span class="num">8.</span> Give the Worker its own hostname</h2>
+    <p class="why">Her app needs a stable address to POST to.</p></div></div>
+  <div class="body">
+    <p>Cloudflare → Workers &amp; Pages → <strong>comicscuzyes-publisher</strong> →
+    <strong>Settings</strong> → <strong>Domains &amp; Routes</strong> → <strong>Add</strong> →
+    <strong>Custom domain</strong> → <code>publish.comicscuzyes.com</code>.</p>
+    <p>Confirm it's alive:</p>
+    <pre><code>curl https://publish.comicscuzyes.com/</code></pre>
+    <p>It should answer <em>"comicscuzyes publisher. Nothing to see here."</em></p>
+  </div>
+</section>
+
+<!-- 8 -->
+<section class="step" data-step>
+  <div class="head"><input type="checkbox">
+    <div><h2><span class="num">9.</span> Cloudflare Access — the no-more-PINs part</h2>
+    <p class="why">This is the piece that lets you approve with a Google click instead of a code.</p></div></div>
+  <div class="body">
+    <p><strong>First, add Google as a login method.</strong> Zero Trust → <strong>Settings</strong>
+    → <strong>Authentication</strong> → Login methods → <strong>Add new</strong> → <strong>Google</strong>.
+    It walks you through creating an OAuth client in Google Cloud — a plain Gmail account is fine,
+    you do not need Workspace.</p>
+    <p><strong>Then create the application.</strong> Zero Trust → <strong>Access</strong> →
+    <strong>Applications</strong> → <strong>Add an application</strong> → <strong>Self-hosted</strong>:</p>
+    <ul>
+      <li>Subdomain <code>publish</code>, domain <code>comicscuzyes.com</code>, path <code>review</code></li>
+      <li><strong>Session Duration: 1 month</strong> — the default is 24 hours, change it</li>
+      <li>Login methods: Google only (untick One-time PIN)</li>
+      <li>Policy: <em>Allow</em> → Include → <strong>Emails</strong> → your address</li>
+    </ul>
+    <p>Open the app's <strong>Overview</strong> tab and copy the <strong>Application Audience (AUD) Tag</strong>.</p>
+    <div class="field">
+      <label>AUD tag</label>
+      <input data-var="aud" placeholder="64 hex characters">
+    </div>
+    <div class="field">
+      <label>Team name <span class="hint">— the bit before .cloudflareaccess.com</span></label>
+      <input data-var="team" placeholder="rvh">
+    </div>
+    <p>Put both into <code>wrangler.toml</code> and redeploy:</p>
+    <pre><code>ACCESS_TEAM = "<span data-out="team">your-team</span>"
+ACCESS_AUD = "<span data-out="aud">your-aud-tag</span>"</code></pre>
+    <pre><code>npx wrangler deploy</code></pre>
+    <div class="warn"><strong>Don't skip the redeploy</strong>
+    Until those two values are live, the Worker refuses every request to
+    <code>/review</code> — including yours. The one-click email links still work.</div>
+  </div>
+</section>
+
+<!-- 9 -->
+<section class="step" data-step>
+  <div class="head"><input type="checkbox">
+    <div><h2><span class="num">10.</span> Test the whole path yourself</h2>
+    <p class="why">Do this before you hand her anything, so the first thing she sees is it working.</p></div></div>
+  <div class="body">
+    <p>Submit a comic by hand, as if you were her app:</p>
+    <pre><code>curl -X POST https://publish.comicscuzyes.com/submit \
+  -H "Authorization: Bearer <span data-out="submit">YOUR-SUBMIT-SECRET</span>" \
+  -F "image=@src/static/images/comics/hello-world.png" \
+  -F "title=Test comic" \
+  -F "note=ignore me"</code></pre>
+    <p>You should get <code>{"ok":true,...}</code> back, and an email within a few seconds.
+    Click <strong>Publish it</strong> in the email. Wait about a minute for Pages to rebuild,
+    then load <code>comicscuzyes.com</code> — the test comic should be the front page.</p>
+    <p>Then visit <code>publish.comicscuzyes.com/review</code> to confirm Google login works
+    and the queue is empty. Finally, delete the test:</p>
+    <pre><code>git pull
+git rm src/comics/*test-comic.md src/static/images/comics/test-comic.png
+git commit -m "Remove test" &amp;&amp; git push</code></pre>
+    <div class="note"><strong>If the email never arrives</strong>
+    <code>npx wrangler tail</code> in the worker folder shows live logs. A Resend rejection
+    almost always means the domain isn't verified yet.</div>
+  </div>
+</section>
+
+<!-- 10 -->
+<section class="step" data-step>
+  <div class="head"><input type="checkbox">
+    <div><h2><span class="num">11.</span> Set up her Mac and iPad</h2>
+    <p class="why">The part she actually touches.</p></div></div>
+  <div class="body">
+    <p><strong>The droplet app</strong> — run this on her MacBook (or yours, then AirDrop the app):</p>
+    <pre><code>cd path/to/comicscuzyes/clients
+./build-droplet.sh <span data-out="submit">YOUR-SUBMIT-SECRET</span></code></pre>
+    <p>Drag <strong>Send to Comics Cuz Yes.app</strong> into her Dock. Drop a PNG on it.
+    First launch may need a right-click → <strong>Open</strong>.</p>
+    <div class="warn"><strong>This one is untested</strong>
+    It was written on Linux, where AppleScript can't be compiled. If
+    <code>osacompile</code> throws an error, paste it to me and I'll fix it.</div>
+
+    <p><strong>The Shortcut</strong> — do this once on her Mac and it syncs to her iPad:</p>
+    <ol>
+      <li>Shortcuts → <strong>+</strong> → name it <strong>Send to Comics Cuz Yes</strong></li>
+      <li>Details (ⓘ) → tick <strong>Show in Share Sheet</strong> → accepted input: <strong>Images</strong></li>
+      <li>Add <strong>Ask for Input</strong> → Text → "What's this comic called?"</li>
+      <li>Add <strong>Get Contents of URL</strong> → <code>https://publish.comicscuzyes.com/submit</code>
+        → Method <strong>POST</strong>
+        <ul>
+          <li>Header <code>Authorization</code> = <code>Bearer <span data-out="submit">YOUR-SUBMIT-SECRET</span></code></li>
+          <li>Body <strong>Form</strong>: <code>image</code> = File → Shortcut Input; <code>title</code> = Text → Provided Input</li>
+        </ul>
+      </li>
+      <li>Add <strong>Show Notification</strong> → "Sent to Dad!"</li>
+      <li>Run it once from Photos to grant permissions</li>
+    </ol>
+  </div>
+</section>
+
+<div style="text-align:center;margin:2.5rem 0">
+  <button class="exportbtn" onclick="exportValues()">Save my values to a file</button>
+  <p class="sub" style="margin-top:.6rem;font-size:.85rem">
+    Writes a text file with everything you've entered. Keep it somewhere safe — it contains secrets.</p>
+</div>
+
+<footer>
+  <p>If something goes sideways, <code>npx wrangler tail</code> in the worker folder shows
+  live logs, and <code>node test.mjs</code> re-runs the 22 checks offline.</p>
+</footer>
+
+</div>
+
+<script>
+const vals = {};
+
+document.querySelectorAll('[data-var]').forEach(inp => {
+  inp.addEventListener('input', () => {
+    vals[inp.dataset.var] = inp.value.trim();
+    document.querySelectorAll(`[data-out="${inp.dataset.var}"]`).forEach(out => {
+      if (inp.value.trim()) { out.textContent = inp.value.trim(); out.classList.remove('missing'); }
+      else { out.textContent = out.dataset.placeholder; out.classList.add('missing'); }
+    });
+  });
+});
+document.querySelectorAll('[data-out]').forEach(o => o.dataset.placeholder = o.textContent);
+
+function genSecrets() {
+  const hex = n => Array.from(crypto.getRandomValues(new Uint8Array(n)))
+    .map(b => b.toString(16).padStart(2, '0')).join('');
+  const set = (name, v) => {
+    const el = document.querySelector(`[data-var="${name}"]`);
+    el.value = v; el.dispatchEvent(new Event('input'));
+  };
+  set('submit', hex(24));
+  set('approval', hex(32));
+}
+
+// progress
+const steps = [...document.querySelectorAll('[data-step]')];
+steps.forEach(s => {
+  const box = s.querySelector('input[type=checkbox]');
+  s.querySelector('.head').addEventListener('click', e => {
+    if (e.target !== box) box.checked = !box.checked;
+    s.classList.toggle('done', box.checked);
+    tally();
+  });
+});
+function tally() {
+  const n = steps.filter(s => s.querySelector('input[type=checkbox]').checked).length;
+  document.getElementById('fill').style.width = (n / steps.length * 100) + '%';
+  document.getElementById('count').textContent = `${n} of ${steps.length}`;
+}
+
+// copy buttons
+document.querySelectorAll('pre').forEach(pre => {
+  const b = document.createElement('button');
+  b.textContent = 'copy';
+  b.onclick = () => {
+    navigator.clipboard.writeText(pre.querySelector('code').innerText);
+    b.textContent = 'copied'; setTimeout(() => b.textContent = 'copy', 1400);
+  };
+  pre.appendChild(b);
+});
+
+function exportValues() {
+  const labels = {
+    repo: 'GitHub repo', expiry: 'GitHub token expires',
+    email: 'Approval email', submit: 'SUBMIT_SECRET', approval: 'APPROVAL_SECRET',
+    kv: 'KV namespace id', aud: 'Access AUD tag', team: 'Access team name',
+  };
+  let out = 'Comics Cuz Yes — setup values\n(contains secrets, keep it safe)\n\n';
+  for (const k in labels) out += `${labels[k]}: ${vals[k] || '(not filled in)'}\n`;
+  out += '\nNot recorded here: the GitHub token and the Resend key.\n';
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([out], { type: 'text/plain' }));
+  a.download = 'comicscuzyes-values.txt';
+  a.click();
+}
+</script>
+</body>
+</html>

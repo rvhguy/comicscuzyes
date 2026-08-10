@@ -1,0 +1,30 @@
+node_modules/
+_site/
+preview-*.png
+font-options.png
+home-head.png
+phone-nav.png
+shot.mjs
+fontshot.mjs
+clients/*.app/
+
+# --- secrets and local config: never commit ---
+comicscuzyes-values.txt
+.dev.vars
+.dev.vars.*
+.env
+.env.*
+*.pem
+
+# wrangler local state (can cache KV contents)
+.wrangler/
+
+# macOS cruft
+.DS_Store
+._*
+
+# archives
+*.zip
+
+# scratch: safe to delete
+_to_delete/

@@ -1,0 +1,14 @@
+---
+layout: base.njk
+pagination:
+  data: collections.comics
+  size: 1
+  alias: c
+permalink: "/comic/{{ c.data.slug }}/"
+eleventyComputed:
+  pageTitle: "{{ c.data.title }}"
+---
+{% set comics = collections.comics %}
+{% include "strip.njk" %}
+{% set idx = pagination.pageNumber %}
+{% include "nav.njk" %}
