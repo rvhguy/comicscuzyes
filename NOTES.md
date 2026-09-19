@@ -3,9 +3,29 @@
 A webcomic site at **comicscuzyes.com** for my daughter, who publishes under the pen
 name **Octember**. She uploads; nothing goes live until I approve it.
 
-**Status as of 2026-08-09: built and tested, not deployed.** No GitHub repo, Cloudflare
-Pages project, Worker, Resend account, or Access application exists yet. Follow
-`DEPLOY-CHECKLIST.html` (open it in a browser) or `SETUP.md` (same steps, plain text).
+**Status as of 2026-09-19: deployed and tested end to end.** Checklist steps 1–8 and 10
+are done; step 9 (Access) was deliberately skipped; step 11 (her Mac and iPad) is next.
+
+- Site: comicscuzyes.com + www, Cloudflare Pages, built from the private repo
+  `rvhguy/comicscuzyes`. Remote is `git@github-personal:rvhguy/comicscuzyes.git` — never a
+  plain `github.com` remote.
+- Worker `comicscuzyes-publisher` at `publish.comicscuzyes.com` (custom domain, declared in
+  `wrangler.toml`) and `comicscuzyes-publisher.rvhguy.workers.dev`. Preview URLs are off.
+  Cloudflare account `c8fb671d6f0cdef2680387e0ff151755` — there's a second account, so run
+  `npx wrangler whoami` before creating anything.
+- KV `PENDING` = `9e72116d60804c869c9e9db441d7fce9`. Approval email goes to
+  bowahandrobert@gmail.com via Resend.
+- Wrangler is pinned (exact) in `worker/package.json`; `npm install` in `worker/` first.
+- Four Worker secrets: `SUBMIT_SECRET`, `APPROVAL_SECRET`, `GH_TOKEN`, `RESEND_KEY`. Worker
+  secrets are write-only — nothing can read them back. `SUBMIT_SECRET` is also in my macOS
+  Keychain: `security find-generic-password -s comicscuzyes-SUBMIT_SECRET -w`. If a secret
+  is lost, generate a new one and `wrangler secret put` it again.
+- **The GitHub token expires 2027-08-01. Publishing stops silently then** — approve links
+  will fail at the commit step. Make a new fine-grained token (Contents: read/write, this
+  repo only) and `npx wrangler secret put GH_TOKEN`.
+
+`DEPLOY-CHECKLIST.html` / `SETUP.md` describe the original setup. The Cloudflare dashboard
+has moved since: a Worker's custom domains are now on its own **Domains** tab.
 
 ---
 
@@ -67,6 +87,17 @@ against Cloudflare's public certs, checking issuer, audience, and expiry. Keep i
 **`ACCESS_TEAM` and `ACCESS_AUD` are baked in at deploy time.** Until you redeploy after
 creating the Access app, the Worker rejects every request to `/review` — including yours,
 even after a successful login. This looks exactly like a permissions bug and is not one.
+
+**Access was skipped on purpose (2026-09-19), so `/review` returns 403 to everyone.** That's
+by design, not a bug. Approvals happen only through the signed Publish/Not yet links in
+each email — per-comic, no login, valid one week. The catch: a comic whose email link has
+expired can't be approved (it stays in KV until its 60-day TTL); ask her to send it again.
+If that gets annoying, the considered fix was a `REVIEW_KEY` secret that unlocks the queue
+page at a bookmarkable URL, with the page's buttons using the same signed per-comic tokens.
+Keep `accessOk()` either way; it's what keeps `/review` shut on every hostname.
+
+**Worker secrets must be set before the first deploy.** With `SUBMIT_SECRET` unset, the
+submit check compares against the literal `Bearer undefined`.
 
 **Multipart form encoding converts a typed newline to CRLF.** A stray carriage return
 inside YAML front matter breaks the Eleventy build, so a comic could be approved and then
