@@ -2,9 +2,15 @@ name = "comicscuzyes-publisher"
 main = "src/index.js"
 compatibility_date = "2026-08-01"
 
-# publish.comicscuzyes.com routes here; /review is additionally protected by a
-# Cloudflare Access policy AND by JWT verification inside the Worker.
-# routes = [{ pattern = "publish.comicscuzyes.com", custom_domain = true }]
+# publish.comicscuzyes.com routes here. /review only opens with a valid
+# Cloudflare Access JWT, verified inside the Worker; Access isn't set up, so
+# /review is locked by design and approvals go through the emailed links.
+routes = [{ pattern = "publish.comicscuzyes.com", custom_domain = true }]
+
+# workers.dev stays on (a fallback address); per-version preview URLs are just
+# more unprotected hostnames nobody uses.
+workers_dev = true
+preview_urls = false
 
 [[kv_namespaces]]
 binding = "PENDING"

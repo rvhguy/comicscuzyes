@@ -1,0 +1,13 @@
+{
+  "name": "comicscuzyes-publisher",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node test.mjs",
+    "deploy": "wrangler deploy",
+    "tail": "wrangler tail"
+  },
+  "devDependencies": {
+    "wrangler": "4.135.0"
+  }
+}
