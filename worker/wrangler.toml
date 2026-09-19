@@ -8,12 +8,12 @@ compatibility_date = "2026-08-01"
 
 [[kv_namespaces]]
 binding = "PENDING"
-id = "REPLACE_WITH_KV_NAMESPACE_ID"
+id = "9e72116d60804c869c9e9db441d7fce9"
 
 [vars]
-GH_REPO = "YOURNAME/comicscuzyes"      # owner/repo
+GH_REPO = "rvhguy/comicscuzyes"        # owner/repo
 GH_BRANCH = "main"
-NOTIFY_TO = "you@example.com"
+NOTIFY_TO = "bowahandrobert@gmail.com"
 NOTIFY_FROM = "Comics Cuz Yes <comics@comicscuzyes.com>"
 ACCESS_TEAM = "yourteam"               # <yourteam>.cloudflareaccess.com
 ACCESS_AUD = "REPLACE_WITH_ACCESS_APP_AUD"
